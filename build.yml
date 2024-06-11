@@ -25,3 +25,34 @@ jobs:
             -Dsonar.organization=johnysaac10
             -Dsonar.projectKey=practica-git-vmt
             -Dsonar.python.coverage.reportPaths=coverage.xml
+
+
+name: Publish Docker image
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+          logout: true
+
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: nodejs:latest
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
